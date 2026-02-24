@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------
+  # 1. SEU BANCO DE DADOS (Intacto)
+  # ----------------------------------------
+  pgsql-scoutpro:
+    container_name: pgsql-scoutpro
+    image: postgres:16-alpine
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: pgsql-scoutpro-master
+      POSTGRES_PASSWORD: pgsql-scoutpro-password
+      POSTGRES_DB: scoutpro
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - backend
+
+  # ----------------------------------------
+  # 2. SEU PGADMIN (Intacto)
+  # ----------------------------------------
+  pgadmin:
+    container_name: scoutpro-pgadmin
+    image: dpage/pgadmin4:latest
+    restart: always
+    ports:
+      - "8124:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: scoutpro@web.edu.br
+      PGADMIN_DEFAULT_PASSWORD: 123456
+    networks:
+      - backend
+
+  # ----------------------------------------
+  # 3. NOVO: BACKEND (Spring Boot)
+  # ----------------------------------------
+  backend:
+    container_name: scoutpro-backend
+    build: ./backend  # Procura o Dockerfile dentro da pasta backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Sobrescreve as configurações do application.properties para conectar no container do banco
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pgsql-scoutpro:5432/scoutpro
+      SPRING_DATASOURCE_USERNAME: pgsql-scoutpro-master
+      SPRING_DATASOURCE_PASSWORD: pgsql-scoutpro-password
+      SERVER_PORT: 8080
+    depends_on:
+      - pgsql-scoutpro
+    networks:
+      - backend
+
+  # ----------------------------------------
+  # 4. NOVO: FRONTEND (React)
+  # ----------------------------------------
+  frontend:
+    container_name: scoutpro-frontend
+    build: ./frontend # Procura o Dockerfile dentro da pasta frontend (ou ./src dependendo do nome da sua pasta)
+    ports:
+      - "3000:80"     # Acessa o React no navegador usando http://localhost:3000
+    depends_on:
+      - backend
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:

@@ -1,0 +1,198 @@
+# =================================================================
+# Arquivo para testar os endpoints da API do Scout Pro.
+# Use com a extensão "REST Client" no VS Code ou similar.
+# =================================================================
+
+# Variável base da URL da API (Ajustado para a porta 3400 e versão v1)
+@baseUrl = http://localhost:3400/api/v1
+
+# Cole aqui o token gerado após fazer o login no passo 2
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc3MTY5MzI3OSwiZXhwIjoxNzc0Mjg1Mjc5fQ.WdsRE8-RRm55fQFXza7WYfHbZihNGdOIkZY9qUY18ik
+
+# Variáveis para IDs (substitua pelos IDs reais após a criação)
+@adminId = 1
+@scoutId = 2
+@playerId = 1
+@reportId = 1
+@messageId = 1
+@attributeId = 1
+
+
+# -----------------------------------------------------------------
+#                     AUTENTICAÇÃO (CADASTRO E LOGIN)
+# -----------------------------------------------------------------
+
+### 1. Cadastrar Administrador
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Admin Teste",
+  "email": "admin@example.com",
+  "password": "senhaSegura123",
+  "role": "ADMIN"
+}
+
+### 2. Fazer Login (Gera o Token)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "senhaSegura123"
+}
+
+# -----------------------------------------------------------------
+#                     USUÁRIOS (ADMIN E OLHEIRO)
+# -----------------------------------------------------------------
+
+### 3. Listar todos os usuários (Rota corrigida para /admin/users)
+GET {{baseUrl}}/admin/users
+Authorization: Bearer {{token}}
+
+### 6. Deletar usuário (Rota corrigida para /admin/users)
+DELETE {{baseUrl}}/admin/users/{{scoutId}}
+Authorization: Bearer {{token}}
+
+# (Nota: As rotas 4 e 5 foram removidas pois não existem no AdminController.java)
+
+
+# -----------------------------------------------------------------
+#                         JOGADORES / ATLETAS
+# -----------------------------------------------------------------
+
+### 7. Cadastrar Atleta (Atenção: O token precisa ser de um SCOUT)
+POST {{baseUrl}}/athletes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "João Silva",
+  "position": "FORWARD",
+  "age": 18,
+  "club": "Clube Exemplo A",
+  "dominant_foot": "RIGHT",
+  "height": 1.85,
+  "weight": 78.5,
+  "created_by_scout_id": {{scoutId}}
+}
+
+### 8. Listar todos os atletas
+GET {{baseUrl}}/athletes
+Authorization: Bearer {{token}}
+
+
+# -----------------------------------------------------------------
+#                         RELATÓRIOS
+# -----------------------------------------------------------------
+
+### 12. Criar Relatório de Scouting (Atenção: O token precisa ser de um SCOUT)
+POST {{baseUrl}}/reports
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "athlete_id": {{playerId}},
+  "scout_id": {{scoutId}}, 
+  "notes": "Análise detalhada do desempenho do jogador em campo.",
+  "strengths": "Excelente finalização e visão de jogo.",
+  "weaknesses": "Precisa melhorar o trabalho defensivo.",
+  "physical_rating": 8,
+  "tactical_rating": 7,
+  "technical_rating": 9
+}
+
+### 13. Listar todos os relatórios
+GET {{baseUrl}}/reports
+Authorization: Bearer {{token}}
+
+### 14. Obter relatório por ID
+GET {{baseUrl}}/reports/{{reportId}}
+Authorization: Bearer {{token}}
+
+### 15. Atualizar relatório
+PUT {{baseUrl}}/reports/{{reportId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "overall_rating": 9.0,
+  "recommendation": "Altamente recomendado para o time principal."
+}
+
+### 16. Deletar relatório
+DELETE {{baseUrl}}/reports/{{reportId}}
+Authorization: Bearer {{token}}
+
+# -----------------------------------------------------------------
+#                 ATRIBUTOS DETALHADOS DO JOGADOR
+# -----------------------------------------------------------------
+
+### 17. Adicionar Atributo Detalhado ao Relatório
+POST {{baseUrl}}/player_detailed_attributes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "report_id": {{reportId}},
+  "attribute_name": "passing",
+  "attribute_value": 7.5
+}
+
+### 18. Listar todos os atributos detalhados
+GET {{baseUrl}}/player_detailed_attributes
+Authorization: Bearer {{token}}
+
+### 19. Obter atributo detalhado por ID
+GET {{baseUrl}}/player_detailed_attributes/{{attributeId}}
+Authorization: Bearer {{token}}
+
+### 20. Atualizar atributo detalhado
+PUT {{baseUrl}}/player_detailed_attributes/{{attributeId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "attribute_value": 8.0
+}
+
+### 21. Deletar atributo detalhado
+DELETE {{baseUrl}}/player_detailed_attributes/{{attributeId}}
+Authorization: Bearer {{token}}
+
+# -----------------------------------------------------------------
+#                         MENSAGENS
+# -----------------------------------------------------------------
+
+### 22. Enviar Mensagem
+POST {{baseUrl}}/messages
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "sender_id": {{adminId}},
+  "receiver_id": {{scoutId}}, 
+  "player_id": {{playerId}},
+  "message_text": "Olá Olheiro Teste, por favor, revise o relatório do João Silva."
+}
+
+### 23. Listar todas as mensagens
+GET {{baseUrl}}/messages
+Authorization: Bearer {{token}}
+
+### 24. Obter mensagem por ID
+GET {{baseUrl}}/messages/{{messageId}}
+Authorization: Bearer {{token}}
+
+### 25. Atualizar status da mensagem (marcar como lida)
+PUT {{baseUrl}}/messages/{{messageId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "is_read": true
+}
+
+### 26. Deletar mensagem
+DELETE {{baseUrl}}/messages/{{messageId}}
+Authorization: Bearer {{token}}

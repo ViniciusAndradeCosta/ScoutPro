@@ -1,0 +1,34 @@
+services:
+  pgsql-scoutpro:
+    container_name: pgsql-scoutpro
+    image: postgres:16-alpine
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: pgsql-scoutpro-master
+      POSTGRES_PASSWORD: pgsql-scoutpro-password
+      POSTGRES_DB: scoutpro
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./tables.sql:/docker-entrypoint-initdb.d/tables.sql
+    networks:
+      - backend
+
+  pgadmin:
+    container_name: scoutpro-pgadmin
+    image: dpage/pgadmin4:latest
+    restart: always
+    ports:
+      - "8124:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: scoutpro@web.edu.br
+      PGADMIN_DEFAULT_PASSWORD: 123456
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:
