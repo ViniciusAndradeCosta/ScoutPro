@@ -70,7 +70,6 @@ O presente trabalho apresenta o **ScoutPro**, um sistema web desenvolvido para a
 * Documentação Oficial do Spring Boot: https://spring.io/projects/spring-boot
 * Documentação Oficial do React: https://react.dev/
 * Documentação do Vite: https://vitejs.dev/
-* *[Adicione aqui outras referências relevantes, como materiais da disciplina, artigos ou bibliotecas adicionais utilizadas]*
 
 [![Acessar Protótipo no Figma](https://img.shields.io/badge/Figma-Acessar%20Layout-black?style=for-the-badge&logo=figma)](https://www.figma.com/make/5ByncZFogmFCyt2MCXITwd/Layout-ScoutPro-Web-I?t=PDTTtIItFj37U7o8-20&fullscreen=1)
 
