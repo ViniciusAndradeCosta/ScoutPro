@@ -17,51 +17,60 @@
 </p>
 
 ---
+# CSI606-2024-02 - Remoto - Trabalho Final - Resultados
 
-## 📋 Resumo
+## Resumo
 
-O **ScoutPro** é um sistema web desenvolvido para otimizar o processo de *scouting* (prospecção e análise) de talentos esportivos. 
+O presente trabalho apresenta o **ScoutPro**, um sistema web desenvolvido para auxiliar olheiros de futebol e administradores de clubes. O principal objetivo da aplicação é gerir dados de jogadores e centralizar relatórios de desempenho, otimizando o processo de análise técnica, tática e estatística de atletas. A solução foi construída através de uma arquitetura full-stack.
 
-O objetivo principal é oferecer uma plataforma centralizada onde olheiros, treinadores e analistas possam gerenciar dados de atletas, registrar avaliações técnicas e acompanhar o desempenho de jogadores de forma organizada e eficiente, substituindo planilhas manuais e dados descentralizados.
+## 1. Funcionalidades implementadas
 
----
+* Cadastro e gestão de jogadores (informações técnicas, físicas e histórico).
+* Criação, edição e visualização de relatórios de desempenho detalhados pelos olheiros.
+* Painel administrativo para a gestão do clube e dos utilizadores (olheiros) cadastrados.
+* Interface web interativa e navegação fluida entre os módulos do sistema.
 
-## 1. 🎯 Tema
+## 2. Funcionalidades previstas e não implementadas
 
-O sistema consiste em uma aplicação web para **Gestão de Scouting Esportivo**. 
+* *[Adicione aqui funcionalidades que planeou inicialmente, como alertas automáticos ou integrações com APIs externas de partidas, mas que não entraram na versão final]*
+* Exportação massiva de relatórios de scout em PDF/Excel.
 
-O foco é a criação de uma interface intuitiva e responsiva que permita:
-* Cadastro e visualização detalhada de perfis de atletas.
-* Geração de relatórios de observação baseados em critérios técnicos e táticos.
-* Centralização da informação para tomada de decisão em clubes.
+## 3. Outras funcionalidades implementadas
 
----
+* Sistema de controlo de acesso (autenticação e autorização).
+* Desenvolvimento de uma API RESTful padronizada no backend.
+* Responsividade na interface de utilizador.
 
-## 2. 🚀 Escopo
+## 4. Principais desafios e dificuldades
 
-As funcionalidades principais planejadas para o MVP (*Minimum Viable Product*) incluem:
+* Integração entre o backend em Java (Spring Boot) e a interface do utilizador em React (TypeScript/Vite).
+* Modelação da base de dados para relacionar eficientemente as avaliações dos olheiros com o histórico e as métricas de cada jogador.
+* Gestão de estado no frontend para garantir que os formulários complexos de avaliação desportiva funcionassem sem falhas.
 
-* 🔐 **Controle de Acesso:** Login e autenticação para perfis distintos (ex: *Admin*, *Olheiro*).
-* 🏃 **Gestão de Atletas:** Cadastro completo (dados pessoais, posição, pé dominante, histórico).
-* 📝 **Relatórios de Avaliação:** Criação de fichas técnicas por partida/treino.
-* 📊 **Dashboard:** Visão geral com métricas rápidas e últimos atletas avaliados.
-* 🔍 **Filtros Avançados:** Busca refinada por posição, idade ou características.
-* 💬 **Chat:** Chat para troca de mensagens entre olheiros e administradores.
+## 5. Instruções para instalação e execução
 
+**Pré-requisitos:**
+* Java (JDK 17 ou superior)
+* Node.js e gestor de pacotes (npm/yarn)
+* Base de dados configurada (PostgreSQL, MySQL, etc.)
 
----
+**Passo a passo para o Backend (Spring Boot):**
+1. Abra um terminal e navegue até ao diretório do backend.
+2. Certifique-se de que configura as variáveis de ambiente e credenciais da base de dados no ficheiro `application.properties` (ou `.yml`).
+3. Execute o projeto usando o Maven ou diretamente pela sua IDE (ex: `./mvnw spring-boot:run`). O servidor iniciará por padrão na porta 8080.
 
-## 3. 🚫 Restrições
+**Passo a passo para o Frontend (React/Vite):**
+1. Abra outro terminal e navegue até ao diretório do frontend.
+2. Execute o comando `npm install` (ou `yarn`) para instalar todas as dependências.
+3. Execute `npm run dev` (ou `yarn dev`) para rodar o servidor local.
+4. Aceda ao sistema pelo navegador através da porta indicada no terminal (geralmente `http://localhost:5173`).
 
-> *Neste trabalho não serão considerados integrações com APIs externas de estatísticas (como dados em tempo real), funcionalidades de transações financeiras (gestão de contratos/salários) e suporte a múltiplos idiomas.*
+## 6. Referências
 
----
-
-## 4. 🎨 Protótipo
-
-O design de interface e o fluxo de navegação foram desenvolvidos no **Figma**. Você pode visualizar o protótipo de alta fidelidade no link abaixo:
-
-<div align="center">
+* Documentação Oficial do Spring Boot: https://spring.io/projects/spring-boot
+* Documentação Oficial do React: https://react.dev/
+* Documentação do Vite: https://vitejs.dev/
+* *[Adicione aqui outras referências relevantes, como materiais da disciplina, artigos ou bibliotecas adicionais utilizadas]*
 
 [![Acessar Protótipo no Figma](https://img.shields.io/badge/Figma-Acessar%20Layout-black?style=for-the-badge&logo=figma)](https://www.figma.com/make/5ByncZFogmFCyt2MCXITwd/Layout-ScoutPro-Web-I?t=PDTTtIItFj37U7o8-20&fullscreen=1)
 
