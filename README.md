@@ -8,8 +8,8 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/DISCIPLINA-CSI606-blue?style=for-the-badge&logo=university" alt="Disciplina CSI606">
-  <img src="https://img.shields.io/badge/SEMESTRE-2025%2F01-green?style=for-the-badge" alt="Semestre 2025/01">
-  <img src="https://img.shields.io/badge/STATUS-EM%20DESENVOLVIMENTO-orange?style=for-the-badge" alt="Status">
+  <img src="https://img.shields.io/badge/SEMESTRE-2025%2F01-blue?style=for-the-badge" alt="Semestre 2025/01">
+  <img src="https://img.shields.io/badge/STATUS-CONCLUÍDO-green?style=for-the-badge" alt="Status">
 </p>
 
 <p align="center">
@@ -17,60 +17,125 @@
 </p>
 
 ---
-# CSI606-2024-02 - Remoto - Trabalho Final - Resultados
 
-## Resumo
+# 📘 CSI606 - Trabalho Final - Resultados
 
-O presente trabalho apresenta o **ScoutPro**, um sistema web desenvolvido para auxiliar olheiros de futebol e administradores de clubes. O principal objetivo da aplicação é gerir dados de jogadores e centralizar relatórios de desempenho, otimizando o processo de análise técnica, tática e estatística de atletas. A solução foi construída através de uma arquitetura full-stack.
+## 🧾 Resumo
 
-## 1. Funcionalidades implementadas
+O presente trabalho apresenta o **ScoutPro**, um sistema web desenvolvido para auxiliar olheiros de futebol e administradores de clubes.
 
-* Cadastro e gestão de jogadores (informações técnicas, físicas e histórico).
-* Criação, edição e visualização de relatórios de desempenho detalhados pelos olheiros.
-* Painel administrativo para a gestão do clube e dos utilizadores (olheiros) cadastrados.
-* Interface web interativa e navegação fluida entre os módulos do sistema.
+O principal objetivo da aplicação é gerir dados de jogadores e centralizar relatórios de desempenho, otimizando o processo de análise técnica, tática e estatística de atletas.
 
-## 2. Funcionalidades previstas e não implementadas
+A solução foi construída utilizando uma arquitetura **full-stack**.
 
-* *[Adicione aqui funcionalidades que planeou inicialmente, como alertas automáticos ou integrações com APIs externas de partidas, mas que não entraram na versão final]*
-* Exportação massiva de relatórios de scout em PDF/Excel.
+---
 
-## 3. Outras funcionalidades implementadas
+## ⚙️ 1. Funcionalidades implementadas
 
-* Sistema de controlo de acesso (autenticação e autorização).
-* Desenvolvimento de uma API RESTful padronizada no backend.
-* Responsividade na interface de utilizador.
+- Cadastro e gestão de jogadores (informações técnicas, físicas e histórico)
+- Criação, edição e visualização de relatórios de desempenho detalhados
+- Painel administrativo para gestão de clube e utilizadores (olheiros)
+- Interface web interativa com navegação fluida
 
-## 4. Principais desafios e dificuldades
+---
 
-* Integração entre o backend em Java (Spring Boot) e a interface do utilizador em React (TypeScript/Vite).
-* Modelação da base de dados para relacionar eficientemente as avaliações dos olheiros com o histórico e as métricas de cada jogador.
-* Gestão de estado no frontend para garantir que os formulários complexos de avaliação desportiva funcionassem sem falhas.
+## 🚧 2. Funcionalidades previstas e não implementadas
 
-## 5. Instruções para instalação e execução
+- Integração com APIs externas de partidas em tempo real  
+- Exportação de relatórios em PDF/Excel
 
-**Pré-requisitos:**
-* Java (JDK 17 ou superior)
-* Node.js e gestor de pacotes (npm/yarn)
-* Base de dados configurada (PostgreSQL, MySQL, etc.)
+---
 
-**Passo a passo para o Backend (Spring Boot):**
-1. Abra um terminal e navegue até ao diretório do backend.
-2. Certifique-se de que configura as variáveis de ambiente e credenciais da base de dados no ficheiro `application.properties` (ou `.yml`).
-3. Execute o projeto usando o Maven ou diretamente pela sua IDE (ex: `./mvnw spring-boot:run`). O servidor iniciará por padrão na porta 8080.
+## 🧩 3. Outras funcionalidades implementadas
 
-**Passo a passo para o Frontend (React/Vite):**
-1. Abra outro terminal e navegue até ao diretório do frontend.
-2. Execute o comando `npm install` (ou `yarn`) para instalar todas as dependências.
-3. Execute `npm run dev` (ou `yarn dev`) para rodar o servidor local.
-4. Aceda ao sistema pelo navegador através da porta indicada no terminal (geralmente `http://localhost:5173`).
+- Sistema de autenticação e autorização
+- API RESTful padronizada no backend
+- Interface responsiva
 
-## 6. Referências
+---
 
-* Documentação Oficial do Spring Boot: https://spring.io/projects/spring-boot
-* Documentação Oficial do React: https://react.dev/
-* Documentação do Vite: https://vitejs.dev/
+## ⚠️ 4. Principais desafios e dificuldades
 
-[![Acessar Protótipo no Figma](https://img.shields.io/badge/Figma-Acessar%20Layout-black?style=for-the-badge&logo=figma)](https://www.figma.com/make/5ByncZFogmFCyt2MCXITwd/Layout-ScoutPro-Web-I?t=PDTTtIItFj37U7o8-20&fullscreen=1)
+- Integração entre backend (**Spring Boot**) e frontend (**React + TypeScript + Vite**)
+- Modelagem do banco de dados para relacionar avaliações e histórico dos jogadores
+- Gestão de estado no frontend para formulários complexos
 
-</div>
+---
+
+## 🚀 5. Instruções para instalação e execução
+
+### 🔧 Pré-requisitos
+
+- Docker e Docker Compose  
+- Java JDK 17+  
+- Node.js + npm ou yarn  
+
+---
+
+### 🗄️ Banco de Dados (Docker)
+
+1. Navegue até o diretório do backend (onde está o `compose.yaml`)
+2. Execute:
+
+```bash
+docker compose up -d
+ ```
+
+### Configurações do PostgreSQL:
+
+```bash
+Database: scoutpro
+
+Usuário: pgsql-scoutpro-master
+
+Senha: pgsql-scoutpro-password
+
+Porta: 5432
+
+pgAdmin:
+
+URL: http://localhost:8124
+
+Email: scoutpro@web.edu.br
+
+Senha: 123456
+ ```
+### ☕ Backend (Spring Boot)
+```bash
+Verifique o arquivo application.properties ou .yml
+
+Certifique-se de que as credenciais do banco estão corretas
+
+Execute:
+
+./mvnw spring-boot:run
+
+Ou rode diretamente pela IDE.
+
+Porta padrão: 8080
+```
+### 💻 Frontend (React + Vite)
+```bash
+Acesse a pasta do frontend
+
+Instale as dependências:
+
+npm install
+
+Execute o projeto:
+
+npm run dev
+
+Acesse no navegador:
+
+http://localhost:5173
+```
+📚 6. Referências
+
+Spring Boot: https://spring.io/projects/spring-boot
+
+React: https://react.dev/
+
+Vite: https://vitejs.dev/
+
+Docker: https://docs.docker.com/
