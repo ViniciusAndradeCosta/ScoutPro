@@ -1,141 +1,245 @@
-<h1 align="center">
-  ⚽ ScoutPro
-</h1>
-
 <p align="center">
-  <strong>Sistema de Gestão e Análise de Scouting Esportivo</strong>
+<img src="https://capsule-render.vercel.app/api?type=waving&height=250&color=0:0f2027,50:203a43,100:2c5364&text=ScoutPro&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=40"/>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/DISCIPLINA-CSI606-blue?style=for-the-badge&logo=university" alt="Disciplina CSI606">
-  <img src="https://img.shields.io/badge/SEMESTRE-2025%2F01-blue?style=for-the-badge" alt="Semestre 2025/01">
-  <img src="https://img.shields.io/badge/STATUS-CONCLUÍDO-green?style=for-the-badge" alt="Status">
+⚽ <strong>Sistema de Gestão e Análise de Scouting Esportivo</strong>
 </p>
 
 <p align="center">
-  <strong>Discente:</strong> Vinícius Andrade Costa
+<img src="https://img.shields.io/badge/Disciplina-CSI606-1f6feb?style=for-the-badge&logo=academia&logoColor=white">
+<img src="https://img.shields.io/badge/Semestre-2025%2F01-1f6feb?style=for-the-badge">
+<img src="https://img.shields.io/badge/Status-Concluído-2ea043?style=for-the-badge">
+</p>
+
+<p align="center">
+👨‍🎓 <strong>Discente:</strong> Vinícius Andrade Costa
 </p>
 
 ---
 
-# 📘 CSI606 - Trabalho Final - Resultados
+# ⚽ ScoutPro
 
-## 🧾 Resumo
+O **ScoutPro** é uma plataforma web desenvolvida para apoiar **olheiros, analistas e administradores de clubes de futebol** na gestão e análise de desempenho de jogadores.
 
-O presente trabalho apresenta o **ScoutPro**, um sistema web desenvolvido para auxiliar olheiros de futebol e administradores de clubes.
+O sistema centraliza **dados técnicos, físicos e relatórios de scouting**, permitindo uma análise mais estruturada do potencial e desempenho dos atletas.
 
-O principal objetivo da aplicação é gerir dados de jogadores e centralizar relatórios de desempenho, otimizando o processo de análise técnica, tática e estatística de atletas.
-
-A solução foi construída utilizando uma arquitetura **full-stack**.
+A aplicação foi construída utilizando uma arquitetura **Full Stack**, integrando backend, frontend e banco de dados.
 
 ---
 
-## ⚙️ 1. Funcionalidades implementadas
+# 🧩 Arquitetura da aplicação
 
-- Cadastro e gestão de jogadores (informações técnicas, físicas e histórico)
-- Criação, edição e visualização de relatórios de desempenho detalhados
-- Painel administrativo para gestão de clube e utilizadores (olheiros)
-- Interface web interativa com navegação fluida
+O sistema foi desenvolvido seguindo uma arquitetura moderna baseada em separação de camadas.
+
+
+Frontend
+React + TypeScript + Vite
+
+⬇
+
+Backend
+Spring Boot (API REST)
+
+⬇
+
+Banco de Dados
+PostgreSQL
+
+
+Essa estrutura permite maior **organização, escalabilidade e manutenção do sistema**.
 
 ---
 
-## 🚧 2. Funcionalidades previstas e não implementadas
+# 🏟️ Funcionalidades Implementadas
 
-- Integração com APIs externas de partidas em tempo real  
-- Exportação de relatórios em PDF/Excel
+## 👤 Gestão de Jogadores
+
+- Cadastro de jogadores
+- Informações físicas e técnicas
+- Histórico esportivo
+- Atualização e remoção de dados
 
 ---
 
-## 🧩 3. Outras funcionalidades implementadas
+## 📊 Relatórios de Scouting
 
-- Sistema de autenticação e autorização
-- API RESTful padronizada no backend
+- Criação de relatórios técnicos
+- Avaliação de desempenho
+- Registro de observações do olheiro
+- Visualização detalhada dos atletas
+
+---
+
+## 🧑‍💼 Painel Administrativo
+
+- Gestão de clubes
+- Gestão de olheiros
+- Visualização de relatórios
+- Controle de usuários
+
+---
+
+## 🌐 Interface Web
+
+- Navegação fluida
 - Interface responsiva
+- Comunicação com API REST
+- Experiência otimizada para análise de dados
 
 ---
 
-## ⚠️ 4. Principais desafios e dificuldades
+# 🚧 Funcionalidades Previstas
 
-- Integração entre backend (**Spring Boot**) e frontend (**React + TypeScript + Vite**)
-- Modelagem do banco de dados para relacionar avaliações e histórico dos jogadores
-- Gestão de estado no frontend para formulários complexos
+Algumas funcionalidades foram planejadas para futuras versões do sistema:
 
----
-
-## 🚀 5. Instruções para instalação e execução
-
-### 🔧 Pré-requisitos
-
-- Docker e Docker Compose  
-- Java JDK 17+  
-- Node.js + npm ou yarn  
+- Integração com **APIs de partidas em tempo real**
+- Exportação de relatórios em **PDF ou Excel**
+- Dashboard analítico com estatísticas de jogadores
+- Visualização comparativa entre atletas
 
 ---
 
-### 🗄️ Banco de Dados (Docker)
+# ⚙️ Outras Funcionalidades Implementadas
 
-1. Navegue até o diretório do backend (onde está o `compose.yaml`)
-2. Execute:
+- Sistema de **autenticação e autorização**
+- API RESTful estruturada
+- Comunicação entre frontend e backend
+- Estrutura modular para futuras expansões
+
+---
+
+# ⚠️ Principais Desafios
+
+Durante o desenvolvimento do projeto alguns desafios foram enfrentados:
+
+### 🔗 Integração Full Stack
+
+Integração entre:
+
+- **Backend:** Spring Boot
+- **Frontend:** React + TypeScript
+
+---
+
+### 🗄️ Modelagem de Banco de Dados
+
+Definir relacionamentos entre:
+
+- jogadores
+- relatórios
+- avaliações
+- histórico esportivo
+
+---
+
+### 🎛️ Gestão de Estado no Frontend
+
+Gerenciamento de formulários complexos para cadastro e avaliação de atletas.
+
+---
+
+# 🚀 Instalação e Execução
+
+## 🔧 Pré-requisitos
+
+Antes de iniciar, é necessário ter instalado:
+
+- Docker + Docker Compose
+- Java JDK 17+
+- Node.js + npm ou yarn
+
+---
+
+# 🗄️ Banco de Dados (Docker)
+
+1️⃣ Acesse o diretório do backend.
+
+2️⃣ Execute o comando:
 
 ```bash
 docker compose up -d
- ```
-
-### Configurações do PostgreSQL:
-
+```
+### Configurações PostgreSQL
 ```bash
 Database: scoutpro
 
 Usuário: pgsql-scoutpro-master
-
 Senha: pgsql-scoutpro-password
-
 Porta: 5432
-
-pgAdmin:
-
+pgAdmin
 URL: http://localhost:8124
 
 Email: scoutpro@web.edu.br
-
 Senha: 123456
- ```
-### ☕ Backend (Spring Boot)
-```bash
-Verifique o arquivo application.properties ou .yml
+```
+---
+# ☕ Backend (Spring Boot)
 
-Certifique-se de que as credenciais do banco estão corretas
+Verifique o arquivo:
+```bash
+application.properties
+ou
+application.yml
+```
+Certifique-se de que as credenciais do banco estão corretas.
 
 Execute:
-
+```bash
 ./mvnw spring-boot:run
-
+```
 Ou rode diretamente pela IDE.
 
-Porta padrão: 8080
-```
-### 💻 Frontend (React + Vite)
+Porta padrão:
 ```bash
-Acesse a pasta do frontend
+http://localhost:8080
+```
+---
+# 💻 Frontend (React + Vite)
+
+Acesse a pasta do frontend.
 
 Instale as dependências:
-
+```bash
 npm install
 
-Execute o projeto:
+Execute a aplicação:
 
 npm run dev
-
-Acesse no navegador:
-
+```
+Abra no navegador:
+```bash
 http://localhost:5173
 ```
-📚 6. Referências
+---
+# 🛠️ Tecnologias Utilizadas
+### Backend
+- Spring Boot
+- Java
+- API REST
+### Frontend
+- React
+- TypeScript
+- Vite
+### Banco de Dados
+- PostgreSQL
+- pgAdmin
+### Infraestrutura
+- Docker
+- Docker Compose
 
-Spring Boot: https://spring.io/projects/spring-boot
+---
 
-React: https://react.dev/
+# 📚 Referências
 
-Vite: https://vitejs.dev/
+Spring Boot
+https://spring.io/projects/spring-boot
 
-Docker: https://docs.docker.com/
+React
+https://react.dev/
+
+Vite
+https://vitejs.dev/
+
+Docker
+https://docs.docker.com/
