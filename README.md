@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://capsule-render.vercel.app/api?type=waving&height=250&color=0:0f2027,50:203a43,100:2c5364&text=ScoutPro&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=40"/>
+<img src="https://capsule-render.vercel.app/api?type=venom&height=260&color=0:020617,50:1e3a8a,100:16a34a&text=ScoutPro&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=40"/>
 </p>
 
 <p align="center">
@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-<img src="https://img.shields.io/badge/Disciplina-CSI606-1f6feb?style=for-the-badge&logo=academia&logoColor=white">
-<img src="https://img.shields.io/badge/Semestre-2025%2F01-1f6feb?style=for-the-badge">
-<img src="https://img.shields.io/badge/Status-Concluído-2ea043?style=for-the-badge">
+<img src="https://img.shields.io/badge/Disciplina-CSI606-14532d?style=for-the-badge">
+<img src="https://img.shields.io/badge/Semestre-2025%2F01-14532d?style=for-the-badge">
+<img src="https://img.shields.io/badge/Status-Concluído-14532d?style=for-the-badge">
 </p>
 
 <p align="center">
