@@ -5,8 +5,9 @@ import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import { Badge } from '../ui/badge';
 import { ScrollArea } from '../ui/scroll-area';
-import { MessageSquare, Send, Search, User, CheckCheck, Plus, MoreVertical } from 'lucide-react';
+import { MessageSquare, Send, Search, CheckCheck, Plus, MoreVertical } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { API_ENDPOINTS, apiRequest } from '../../config/api';
 
 interface MessagesViewProps {
   userType: 'admin' | 'scout';
@@ -76,25 +77,15 @@ export function MessagesView({ userType, userName, initialRecipient }: MessagesV
   useEffect(() => {
     const fetchMessagesAndUsers = async () => {
       try {
-        const token = localStorage.getItem('scoutpro_token');
-        if (!token) return;
-        
-        const headers = { 'Authorization': `Bearer ${token}` };
-
-        // CORREÇÃO: URL alterada de /users/all para /users
-        const [meRes, msgRes, usersRes] = await Promise.all([
-          fetch('http://localhost:8080/api/v1/users/me', { headers }),
-          fetch('http://localhost:8080/api/v1/messages', { headers }),
-          fetch('http://localhost:8080/api/v1/users', { headers }) 
+        const [meData, allMessages, allUsers] = await Promise.all([
+          apiRequest<any>(API_ENDPOINTS.USERS.ME),
+          apiRequest<any[]>(API_ENDPOINTS.MESSAGES.LIST),
+          apiRequest<any[]>(API_ENDPOINTS.USERS.LIST),
         ]);
 
-        if (meRes.ok && msgRes.ok && usersRes.ok) {
-          const meData = await meRes.json();
+        {
           const myId = meData.id;
           setCurrentUserId(myId);
-
-          const allMessages = await msgRes.json();
-          const allUsers = await usersRes.json();
 
           const userDict: Record<number, any> = {};
           allUsers.forEach((u: any) => userDict[u.id] = u);
@@ -162,18 +153,11 @@ export function MessagesView({ userType, userName, initialRecipient }: MessagesV
   const handleOpenNewChat = async () => {
     setIsNewChatOpen(true);
     try {
-      const token = localStorage.getItem('scoutpro_token');
-      // CORREÇÃO: URL alterada de /users/all para /users
-      const res = await fetch('http://localhost:8080/api/v1/users', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const allUsers = await res.json();
-        const others = allUsers.filter((u: any) => u.id !== currentUserId);
-        setAvailableContacts(others);
-      }
+      const allUsers = await apiRequest<any[]>(API_ENDPOINTS.USERS.LIST);
+      const others = (allUsers || []).filter((u: any) => u.id !== currentUserId);
+      setAvailableContacts(others);
     } catch (error) {
-      console.error("Erro ao carregar contatos:", error);
+      console.error('Erro ao carregar contatos:', error);
     }
   };
 
@@ -209,24 +193,17 @@ export function MessagesView({ userType, userName, initialRecipient }: MessagesV
     const exactLocalTime = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
 
     try {
-      const token = localStorage.getItem('scoutpro_token');
       const payload = {
         receiverId: selectedConversation.id,
-        content: messageText
+        content: messageText,
       };
 
-      const res = await fetch('http://localhost:8080/api/v1/messages', {
+      const sentMsg = await apiRequest<any>(API_ENDPOINTS.MESSAGES.SEND, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
+        body: payload,
       });
 
-      if (res.ok) {
-        const sentMsg = await res.json();
-        
+      {
         const newMsg = {
           id: sentMsg.id,
           senderId: currentUserId,

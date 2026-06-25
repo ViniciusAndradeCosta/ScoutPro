@@ -1,160 +1,148 @@
 // src/services/authService.ts
-import type { 
-  User, 
-  AuthCredentials, 
-  SignupData, 
-  AuthResponse
+import type {
+  User,
+  UserRole,
+  AuthCredentials,
+  SignupData,
+  AuthResponse,
 } from '../types';
-import { setAuthToken, removeAuthToken } from '../config/api';
+import {
+  API_ENDPOINTS,
+  apiRequest,
+  setAuthToken,
+  removeAuthToken,
+  getAuthToken,
+} from '../config/api';
+
+/**
+ * Serviço de autenticação — conversa diretamente com o backend Spring Boot.
+ *
+ * Contrato real do backend:
+ *  - POST /auth/login e /auth/register retornam apenas { token }.
+ *  - GET  /users/me retorna o usuário autenticado (com role "ADMIN"/"SCOUT").
+ */
+
+/** Converte a role vinda do backend ("ADMIN"/"SCOUT"/"ROLE_ADMIN") para o tipo do front. */
+function normalizeRole(role: unknown): UserRole {
+  return String(role ?? '').toUpperCase().includes('ADMIN') ? 'admin' : 'scout';
+}
+
+/** Mapeia a resposta de /users/me para o tipo User do frontend. */
+function mapUser(data: any): User {
+  return {
+    id: String(data.id ?? ''),
+    email: data.email ?? '',
+    name: data.name ?? '',
+    role: normalizeRole(data.role),
+    avatar: data.image ?? undefined,
+    phone: data.phone ?? undefined,
+    bio: data.bio ?? undefined,
+    specialization: data.specialization ?? undefined,
+    joinedAt: data.joinedAt ?? '',
+    isActive: data.isActive ?? true,
+  };
+}
+
+/** Persiste dados auxiliares usados por outros serviços (ex.: messageService). */
+function rememberUser(user: User): void {
+  localStorage.setItem('current_user_id', user.id);
+  localStorage.setItem('current_user_role', user.role);
+}
 
 export const authService = {
-  /**
-   * Login conectando ao Spring Boot real
-   */
+  /** Busca o usuário autenticado no backend a partir do token salvo. */
+  async getCurrentUser(): Promise<User | null> {
+    if (!getAuthToken()) return null;
+    const data = await apiRequest<any>(API_ENDPOINTS.USERS.ME, { method: 'GET' });
+    const user = mapUser(data);
+    rememberUser(user);
+    return user;
+  },
+
+  /** Realiza login: obtém o token e carrega o perfil real. */
   async login(credentials: AuthCredentials): Promise<AuthResponse> {
-    const response = await fetch('http://localhost:8080/api/v1/auth/login', {
+    const data = await apiRequest<{ token: string }>(API_ENDPOINTS.AUTH.LOGIN, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials),
+      body: credentials,
     });
 
-    if (!response.ok) {
-      throw new Error('Falha no login. Verifique as suas credenciais.');
+    if (!data?.token) {
+      throw new Error('O servidor não retornou um token de acesso.');
     }
 
-    const data = await response.json();
-    const token = data.token; // Pega o JWT real gerado pelo Spring Boot
+    setAuthToken(data.token);
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('Não foi possível carregar o perfil do usuário.');
 
-    // Salva o token real
+    return { user, token: data.token };
+  },
+
+  /** Realiza o cadastro e já autentica o usuário. */
+  async signup(payload: SignupData): Promise<AuthResponse> {
+    const data = await apiRequest<{ token: string }>(API_ENDPOINTS.AUTH.REGISTER, {
+      method: 'POST',
+      body: {
+        name: payload.name,
+        email: payload.email,
+        password: payload.password,
+        role: payload.role.toUpperCase(),
+      },
+    });
+
+    // Alguns backends não devolvem token no register; nesse caso, faz login.
+    let token = data?.token;
+    if (!token) {
+      const login = await this.login({ email: payload.email, password: payload.password });
+      return login;
+    }
+
     setAuthToken(token);
-
-    // Cria um objeto User base para a interface do React não quebrar (agora com joinedAt)
-    const user: User = data.user || {
-      id: '1',
-      email: credentials.email,
-      name: 'Usuário',
-      role: 'admin', // Assume admin para garantir acesso
-      isActive: true,
-      joinedAt: new Date().toISOString(), // CORREÇÃO: Adicionado joinedAt
-    };
-
-    localStorage.setItem('current_user_id', user.id);
-    localStorage.setItem('current_user_role', user.role);
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('Não foi possível carregar o perfil do usuário.');
 
     return { user, token };
   },
 
-  /**
-   * Cadastro conectando ao Spring Boot real
-   */
-  async signup(data: SignupData): Promise<AuthResponse> {
-    // Monta os dados exatamente como o RegisterRequest.java pede
-    const payload = {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      role: 'ADMIN' // Salva como ADMIN no banco PostgreSQL
-    };
-
-    const response = await fetch('http://localhost:8080/api/v1/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error('Falha ao registar o utilizador. O e-mail pode já estar em uso.');
-    }
-
-    const responseData = await response.json();
-    const token = responseData.token;
-
-    setAuthToken(token);
-
-    // (agora com joinedAt)
-    const user: User = responseData.user || {
-      id: '1',
-      email: data.email,
-      name: data.name,
-      role: 'admin',
-      isActive: true,
-      joinedAt: new Date().toISOString(), // CORREÇÃO: Adicionado joinedAt
-    };
-
-    localStorage.setItem('current_user_id', user.id);
-    localStorage.setItem('current_user_role', user.role);
-
-    return { user, token };
-  },
-
-  /**
-   * Realizar logout
-   */
+  /** Encerra a sessão local. */
   async logout(): Promise<void> {
     removeAuthToken();
     localStorage.removeItem('current_user_id');
     localStorage.removeItem('current_user_role');
   },
 
-  /**
-   * Obter usuário atual (Mantém a sessão ativa no React)
-   */
-  async getCurrentUser(): Promise<User | null> {
-    const token = localStorage.getItem('scoutpro_token');
-    if (!token) return null;
-
-    return {
-      id: localStorage.getItem('current_user_id') || '1',
-      email: 'usuario@logado.com',
-      name: 'Utilizador Logado',
-      role: (localStorage.getItem('current_user_role') as 'admin' | 'scout') || 'admin',
-      isActive: true,
-      joinedAt: new Date().toISOString(), // CORREÇÃO: Adicionado joinedAt
-    };
-  },
-
-  /**
-   * Atualizar perfil (Mockado temporariamente)
-   */
+  /** Atualiza o perfil e retorna o usuário recarregado. */
   async updateProfile(updates: Partial<User>): Promise<User> {
-    const userId = localStorage.getItem('current_user_id');
-    if (!userId) throw new Error('Utilizador não autenticado');
-    
-    return {
-      id: userId,
-      email: updates.email || '',
-      name: updates.name || '',
-      role: 'admin',
-      isActive: true,
-      joinedAt: new Date().toISOString(), // CORREÇÃO: Adicionado joinedAt
-    };
+    await apiRequest(API_ENDPOINTS.USERS.UPDATE_PROFILE, {
+      method: 'PUT',
+      body: {
+        name: updates.name,
+        phone: updates.phone,
+        bio: updates.bio,
+        image: updates.avatar,
+      },
+    });
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('Não foi possível recarregar o perfil.');
+    return user;
   },
 
-  /**
-   * Alterar senha (Mockado)
-   */
+  /** Altera a senha do usuário autenticado. */
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
-    // CORREÇÃO: Variáveis agora são utilizadas num log para o TypeScript não reclamar
-    console.log('Senha alterada. (Apenas simulação)', { currentPassword, newPassword });
+    await apiRequest(API_ENDPOINTS.USERS.CHANGE_PASSWORD, {
+      method: 'PUT',
+      body: { currentPassword, newPassword },
+    });
   },
 
-  /**
-   * Verificar se usuário está autenticado
-   */
+  /** Indica se há um token salvo. */
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('scoutpro_token');
+    return !!getAuthToken();
   },
 
-  /**
-   * Obter role do usuário atual
-   */
-  getCurrentUserRole(): 'admin' | 'scout' | null {
-    return localStorage.getItem('current_user_role') as 'admin' | 'scout' | null;
+  getCurrentUserRole(): UserRole | null {
+    return (localStorage.getItem('current_user_role') as UserRole) || null;
   },
 
-  /**
-   * Obter ID do usuário atual
-   */
   getCurrentUserId(): string | null {
     return localStorage.getItem('current_user_id');
   },

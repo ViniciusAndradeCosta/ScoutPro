@@ -7,6 +7,7 @@ import { StatsRadar } from './StatsRadar';
 import { ArrowLeft, Calendar, MapPin, TrendingUp, Award, Activity, User, MessageSquare, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { API_ENDPOINTS, apiRequest } from '../config/api';
 
 interface PlayerProfileProps {
   playerId: string;
@@ -24,25 +25,10 @@ export function PlayerProfile({ playerId, onBack, onCreateReport, userType, onSe
   useEffect(() => {
     const fetchPlayerInfo = async () => {
       try {
-        const token = localStorage.getItem('scoutpro_token');
-        if (!token) {
-          setIsLoading(false);
-          return;
-        }
-
-        const response = await fetch(`http://localhost:8080/api/v1/athletes/${playerId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!response.ok) throw new Error('Erro ao buscar dados do atleta');
-        
-        const data = await response.json();
+        const data = await apiRequest<any>(API_ENDPOINTS.PLAYERS.GET(playerId));
         setPlayer(data);
       } catch (error) {
-        console.error("Erro ao carregar o jogador:", error);
+        console.error('Erro ao carregar o jogador:', error);
       } finally {
         setIsLoading(false);
       }

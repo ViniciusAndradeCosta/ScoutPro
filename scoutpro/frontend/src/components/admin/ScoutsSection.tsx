@@ -3,6 +3,7 @@ import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Search, MapPin, Mail, MessageSquare, Target } from 'lucide-react';
 import { Input } from '../ui/input';
+import { API_ENDPOINTS, apiRequest } from '../../config/api';
 
 interface ScoutsSectionProps {
   onSendMessage: (scoutName: string) => void;
@@ -18,17 +19,10 @@ export function ScoutsSection({ onSendMessage, onNavigate }: ScoutsSectionProps)
   useEffect(() => {
     const fetchScouts = async () => {
       try {
-        const token = localStorage.getItem('scoutpro_token');
-        const res = await fetch('http://localhost:8080/api/v1/users', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const allUsers = await res.json();
-          const onlyScouts = allUsers.filter((u: any) => u.role === 'SCOUT');
-          setScouts(onlyScouts);
-        }
+        const allUsers = await apiRequest<any[]>(API_ENDPOINTS.USERS.LIST);
+        setScouts((allUsers || []).filter((u: any) => u.role === 'SCOUT'));
       } catch (error) {
-        console.error("Erro ao buscar olheiros:", error);
+        console.error('Erro ao buscar olheiros:', error);
       } finally {
         setIsLoading(false);
       }

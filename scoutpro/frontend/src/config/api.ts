@@ -6,8 +6,13 @@
 // CONFIGURAÇÕES DE API
 // ============================================
 
+// Raiz do servidor (sem o prefixo /api/v1). Usada por endpoints públicos
+// que ficam fora do versionamento, como o /api/dashboard/stats da Landing.
+export const SERVER_BASE_URL =
+  import.meta.env.VITE_SERVER_URL || 'http://localhost:8080';
+
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1',
+  BASE_URL: import.meta.env.VITE_API_URL || `${SERVER_BASE_URL}/api/v1`,
   TIMEOUT: 30000,
   HEADERS: {
     'Content-Type': 'application/json',
@@ -21,14 +26,16 @@ export const API_CONFIG = {
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/login',
-    SIGNUP: '/auth/register',
-    LOGOUT: '/auth/logout',
-    REFRESH_TOKEN: '/auth/refresh',
-    ME: '/auth/me',
-    UPDATE_PROFILE: '/auth/profile',
-    CHANGE_PASSWORD: '/auth/password',
+    REGISTER: '/auth/register',
   },
-  
+
+  USERS: {
+    ME: '/users/me',
+    LIST: '/users',
+    UPDATE_PROFILE: '/users/update-profile',
+    CHANGE_PASSWORD: '/users/change-password',
+  },
+
   PLAYERS: {
     LIST: '/athletes',
     GET: (id: string) => `/athletes/${id}`,

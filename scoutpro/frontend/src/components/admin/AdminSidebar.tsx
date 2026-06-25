@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
-import { 
+import {
   LayoutDashboard,
   Users,
   UserPlus,
@@ -11,31 +12,28 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
-  MessageSquare
+  MessageSquare,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-interface AdminSidebarProps {
-  currentSection: string;
-  onNavigate: (section: string) => void;
-  unreadMessages?: number;
-}
+const menuItems = [
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
+  { label: 'Jogadores', icon: Users, path: '/admin/jogadores' },
+  { label: 'Novo Jogador', icon: UserPlus, path: '/admin/jogadores/novo' },
+  { label: 'Relatórios', icon: FileText, path: '/admin/relatorios' },
+  { label: 'Olheiros', icon: Target, path: '/admin/olheiros' },
+  { label: 'Mensagens', icon: MessageSquare, path: '/admin/mensagens' },
+];
 
-export function AdminSidebar({ 
-  currentSection, 
-  onNavigate,
-  unreadMessages = 0
-}: AdminSidebarProps) {
+const SETTINGS_PATH = '/admin/configuracoes';
+
+export function AdminSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const menuItems = [
-    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'players', label: 'Jogadores', icon: Users },
-    { id: 'add-player', label: 'Novo Jogador', icon: UserPlus },
-    { id: 'reports', label: 'Relatórios', icon: FileText },
-    { id: 'scouts', label: 'Olheiros', icon: Target },
-    { id: 'messages', label: 'Mensagens', icon: MessageSquare },
-  ];
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   return (
     <motion.aside
@@ -74,15 +72,15 @@ export function AdminSidebar({
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentSection === item.id;
-          
+          const active = isActive(item.path);
+
           return (
             <Button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
-              variant={isActive ? 'default' : 'ghost'}
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              variant={active ? 'default' : 'ghost'}
               className={`w-full justify-start gap-3 h-12 ${
-                isActive ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg' : 'hover:bg-accent/10'
+                active ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg' : 'hover:bg-accent/10'
               } ${isCollapsed ? 'justify-center' : ''}`}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -108,10 +106,10 @@ export function AdminSidebar({
 
       <div className="p-4 space-y-2">
         <Button
-          onClick={() => onNavigate('settings')}
-          variant={currentSection === 'settings' ? 'default' : 'ghost'}
+          onClick={() => navigate(SETTINGS_PATH)}
+          variant={isActive(SETTINGS_PATH) ? 'default' : 'ghost'}
           className={`w-full justify-start gap-3 h-12 hover:bg-accent/10 ${
-            currentSection === 'settings' ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg' : ''
+            isActive(SETTINGS_PATH) ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg' : ''
           } ${isCollapsed ? 'justify-center' : ''}`}
         >
           <Settings className="w-5 h-5 flex-shrink-0" />

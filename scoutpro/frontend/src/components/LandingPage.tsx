@@ -9,24 +9,20 @@ import {
   Shield,
   TrendingUp,
   Users,
-  Trophy,
   Zap,
   Eye,
-  CheckCircle2,
-  ArrowRight,
-  Star,
   Globe,
-  Github,   
-  Linkedin, 
+  Github,
+  Linkedin,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react'; 
+import { motion, AnimatePresence } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 import heroBackground from 'figma:asset/ffe701c157ebb33d2177c416621151f725679384.png';
+import { SERVER_BASE_URL } from '../config/api';
 
-interface LandingPageProps {
-  onLoginClick: (type: 'admin' | 'scout') => void;
-}
+export function LandingPage() {
+  const navigate = useNavigate();
 
-export function LandingPage({ onLoginClick }: LandingPageProps) {
   // Estado para controlar a exibição dos links de contato
   const [showContact, setShowContact] = useState(false);
 
@@ -39,8 +35,8 @@ export function LandingPage({ onLoginClick }: LandingPageProps) {
   ]);
 
   // Efeito para buscar as estatísticas assim que a página carregar
- useEffect(() => {
-    fetch('http://localhost:8080/api/dashboard/stats')
+  useEffect(() => {
+    fetch(`${SERVER_BASE_URL}/api/dashboard/stats`)
       .then((response) => response.json())
       .then((data) => {
         // Agora pega o número exato. Se não tiver nada no banco, mostra 0.
@@ -117,7 +113,7 @@ export function LandingPage({ onLoginClick }: LandingPageProps) {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Button
                 size="lg"
-                onClick={() => onLoginClick('admin')}
+                onClick={() => navigate('/login/admin')}
                 className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 h-14"
               >
                 <Shield className="w-5 h-5 mr-2" />
@@ -126,7 +122,7 @@ export function LandingPage({ onLoginClick }: LandingPageProps) {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => onLoginClick('scout')}
+                onClick={() => navigate('/login/scout')}
                 className="w-full sm:w-auto border-primary text-primary hover:bg-primary/10 text-lg px-8 h-14"
               >
                 <Target className="w-5 h-5 mr-2" />

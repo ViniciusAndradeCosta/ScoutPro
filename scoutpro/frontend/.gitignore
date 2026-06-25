@@ -1,0 +1,15 @@
+# Dependências
+node_modules/
+
+# Saída de build
+build/
+dist/
+
+# Variáveis de ambiente locais (use .env.example como modelo)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*

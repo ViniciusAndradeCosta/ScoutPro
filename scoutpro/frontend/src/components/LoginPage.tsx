@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -6,21 +7,25 @@ import { Card } from './ui/card';
 import { Checkbox } from './ui/checkbox';
 import { ArrowLeft, Shield, Target, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useAuth } from '../contexts/AuthContext';
 
-interface LoginPageProps {
-  userType: 'admin' | 'scout';
-  onLogin: (type: 'admin' | 'scout') => void;
-  onBack: () => void;
-  onSignupClick?: () => void;
-}
+export function LoginPage() {
+  const navigate = useNavigate();
+  const { role } = useParams<{ role: string }>();
+  const { login, logout } = useAuth();
 
-export function LoginPage({ userType, onLogin, onBack, onSignupClick }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Garante que a rota só aceite os papéis válidos.
+  if (role !== 'admin' && role !== 'scout') {
+    return <Navigate to="/" replace />;
+  }
+  const userType: 'admin' | 'scout' = role;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,63 +33,22 @@ export function LoginPage({ userType, onLogin, onBack, onSignupClick }: LoginPag
     setIsLoading(true);
 
     try {
-      // 1. Faz o login e pega o token
-      const response = await fetch('http://localhost:8080/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      const user = await login({ email, password });
 
-      if (!response.ok) {
-        throw new Error('E-mail ou senha incorretos.');
-      }
-
-      const data = await response.json();
-      const tokenExtraido = data.token || data.accessToken || data.jwt || (typeof data === 'string' ? data : null);
-
-      if (!tokenExtraido) {
-        throw new Error('Servidor não retornou um token de acesso.');
-      }
-
-      // 2. Salva o token para fazer a verificação na API
-      localStorage.setItem('scoutpro_token', tokenExtraido);
-
-      // 3. Busca o perfil do usuário na rota /me para ter 100% de certeza do cargo dele
-      const userResponse = await fetch('http://localhost:8080/api/v1/users/me', {
-        headers: { 'Authorization': `Bearer ${tokenExtraido}` }
-      });
-
-      if (!userResponse.ok) {
-        throw new Error('Erro ao verificar permissões do usuário.');
-      }
-
-      const userData = await userResponse.json();
-      
-      // Converte a role vinda do banco (ex: "ADMIN", "ROLE_ADMIN", "SCOUT")
-      const userRole = String(userData.role || '').toUpperCase();
-
-      const isTryingAdmin = userType === 'admin';
-      const isActualAdmin = userRole.includes('ADMIN');
-
-      // 4. Faz as verificações de acesso
-      if (isTryingAdmin && !isActualAdmin) {
-        localStorage.removeItem('scoutpro_token'); // Remove o token pois o acesso foi negado
-        setError('Esta conta pertence a um Olheiro. Por favor, volte e faça login na área correta.');
+      // Garante que a conta corresponde à área escolhida.
+      if (user.role !== userType) {
+        await logout();
+        setError(
+          user.role === 'admin'
+            ? 'Esta conta pertence a um Administrador. Volte e faça login na área correta.'
+            : 'Esta conta pertence a um Olheiro. Volte e faça login na área correta.',
+        );
         return;
       }
 
-      if (!isTryingAdmin && isActualAdmin) {
-        localStorage.removeItem('scoutpro_token'); // Remove o token pois o acesso foi negado
-        setError('Esta conta pertence a um Administrador. Por favor, volte e faça login na área correta.');
-        return;
-      }
-
-      // Se passou em todas as validações, o login está correto!
-      onLogin(userType);
-      
+      navigate(user.role === 'admin' ? '/admin' : '/olheiro', { replace: true });
     } catch (err: any) {
-      localStorage.removeItem('scoutpro_token'); // Limpa em caso de erro
-      setError(err.message || 'Ocorreu um erro de conexão com o servidor.');
+      setError(err.message || 'E-mail ou senha incorretos.');
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +80,7 @@ export function LoginPage({ userType, onLogin, onBack, onSignupClick }: LoginPag
       >
         <Button
           variant="ghost"
-          onClick={onBack}
+          onClick={() => navigate('/')}
           className="mb-4 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -201,9 +165,9 @@ export function LoginPage({ userType, onLogin, onBack, onSignupClick }: LoginPag
 
             <p className="text-center text-sm text-muted-foreground">
               Não tem uma conta?{' '}
-              <button 
-                type="button" 
-                onClick={onSignupClick}
+              <button
+                type="button"
+                onClick={() => navigate('/cadastro')}
                 className="text-primary hover:underline"
                 disabled={isLoading}
               >

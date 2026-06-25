@@ -15,10 +15,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-
-interface OverviewSectionProps {
-  onNavigate?: (view: string) => void;
-}
+import { API_ENDPOINTS, apiRequest } from '../../config/api';
 
 const COLORS = ['#00d9ff', '#a3ff12', '#ffb800', '#ff4757', '#9b59b6'];
 
@@ -30,7 +27,7 @@ const parseDate = (dateVal: any) => {
   return new Date(dateVal);
 };
 
-export function OverviewSection({ onNavigate }: OverviewSectionProps) {
+export function OverviewSection() {
   const [stats, setStats] = useState({ totalPlayers: 0, totalScouts: 0, totalReports: 0, approvedReports: 0 });
   const [topPlayers, setTopPlayers] = useState<any[]>([]);
   const [positionData, setPositionData] = useState<any[]>([]);
@@ -39,18 +36,11 @@ export function OverviewSection({ onNavigate }: OverviewSectionProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('scoutpro_token');
-        const headers = { 'Authorization': `Bearer ${token}` };
-        
-        const [playersRes, usersRes, reportsRes] = await Promise.all([
-          fetch('http://localhost:8080/api/v1/athletes', { headers }).catch(() => null),
-          fetch('http://localhost:8080/api/v1/users', { headers }).catch(() => null),
-          fetch('http://localhost:8080/api/v1/reports', { headers }).catch(() => null)
+        const [players, users, reports] = await Promise.all([
+          apiRequest<any[]>(API_ENDPOINTS.PLAYERS.LIST).catch(() => []),
+          apiRequest<any[]>(API_ENDPOINTS.USERS.LIST).catch(() => []),
+          apiRequest<any[]>(API_ENDPOINTS.REPORTS.LIST).catch(() => []),
         ]);
-
-        const players = playersRes && playersRes.ok ? await playersRes.json() : [];
-        const users = usersRes && usersRes.ok ? await usersRes.json() : [];
-        const reports = reportsRes && reportsRes.ok ? await reportsRes.json() : [];
 
         const scouts = users.filter((u: any) => u.role === 'SCOUT');
         const approved = reports.filter((r: any) => r.status === 'approved' || r.status === null); 

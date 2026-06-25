@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Search, Eye, Star, CheckCircle, XCircle, FileText } from 'lucide-react';
+import { API_ENDPOINTS, apiRequest } from '../../config/api';
 
 interface Report {
   id: string;
@@ -38,22 +39,14 @@ export function ReportsTable() {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const token = localStorage.getItem('scoutpro_token');
-        const headers = { 'Authorization': `Bearer ${token}` };
-        
-        // CORREÇÃO: Removida a rota /admin/users que causava 403. Usando apenas a /users.
-        const [reportsRes, athletesRes, usersRes] = await Promise.all([
-          fetch('http://localhost:8080/api/v1/reports', { headers }).catch(() => null),
-          fetch('http://localhost:8080/api/v1/athletes', { headers }).catch(() => null),
-          fetch('http://localhost:8080/api/v1/users', { headers }).catch(() => null)
+        const [reportsData, athletesData, rawUsers] = await Promise.all([
+          apiRequest<any[]>(API_ENDPOINTS.REPORTS.LIST).catch(() => []),
+          apiRequest<any[]>(API_ENDPOINTS.PLAYERS.LIST).catch(() => []),
+          apiRequest<any[]>(API_ENDPOINTS.USERS.LIST).catch(() => []),
         ]);
 
-        if (reportsRes && reportsRes.ok) {
-          const reportsData = await reportsRes.json();
-          const athletesData = athletesRes && athletesRes.ok ? await athletesRes.json() : [];
-          
-          const rawUsers = usersRes && usersRes.ok ? await usersRes.json() : [];
-          const allUsers = Array.isArray(rawUsers) ? rawUsers : (rawUsers?.content || rawUsers?.data || []);
+        {
+          const allUsers = Array.isArray(rawUsers) ? rawUsers : ((rawUsers as any)?.content || (rawUsers as any)?.data || []);
 
           const formattedReports = reportsData.map((r: any) => {
             const athlete = athletesData.find((a: any) => String(a.id) === String(r.athleteId));
@@ -102,23 +95,15 @@ export function ReportsTable() {
   const handleStatusChange = async (id: string, newStatus: string) => {
     setLocalStatuses(prev => ({ ...prev, [id]: newStatus }));
     try {
-      const token = localStorage.getItem('scoutpro_token');
       const reportToUpdate = reports.find(r => r.id === id);
-      if(reportToUpdate) {
-        await fetch(`http://localhost:8080/api/v1/reports/${id}`, {
+      if (reportToUpdate) {
+        await apiRequest(API_ENDPOINTS.REPORTS.UPDATE(id), {
           method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ 
-            ...reportToUpdate, 
-            status: newStatus 
-          })
+          body: { ...reportToUpdate, status: newStatus },
         });
       }
-    } catch(err) {
-      console.error("Erro ao salvar status no backend", err);
+    } catch (err) {
+      console.error('Erro ao salvar status no backend', err);
     }
   };
 

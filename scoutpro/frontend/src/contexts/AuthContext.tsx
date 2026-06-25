@@ -14,8 +14,8 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (credentials: AuthCredentials) => Promise<void>;
-  signup: (data: SignupData) => Promise<void>;
+  login: (credentials: AuthCredentials) => Promise<User>;
+  signup: (data: SignupData) => Promise<User>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -65,6 +65,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       const response = await authService.login(credentials);
       setUser(response.user);
+      return response.user;
     } catch (error) {
       console.error('Erro ao fazer login:', error);
       throw error;
@@ -81,6 +82,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       const response = await authService.signup(data);
       setUser(response.user);
+      return response.user;
     } catch (error) {
       console.error('Erro ao fazer cadastro:', error);
       throw error;

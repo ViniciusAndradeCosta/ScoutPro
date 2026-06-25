@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -6,14 +7,12 @@ import { Card } from './ui/card';
 import { ArrowLeft, Shield, Target } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
+import { useAuth } from '../contexts/AuthContext';
 
-interface SignupPageProps {
-  onSignup: (type: 'admin' | 'scout') => void;
-  onBack: () => void;
-  onBackToLogin: () => void;
-}
+export function SignupPage() {
+  const navigate = useNavigate();
+  const { signup } = useAuth();
 
-export function SignupPage({ onSignup, onBack, onBackToLogin }: SignupPageProps) {
   const [userType, setUserType] = useState<'admin' | 'scout'>('scout');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -21,88 +20,27 @@ export function SignupPage({ onSignup, onBack, onBackToLogin }: SignupPageProps)
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // @ts-ignore - Ignora o alerta chato do TypeScript temporariamente
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // 🚨 NOSSO ALERTA DETETIVE: Se isso não aparecer na tela, o frontend não atualizou!
-    alert("🚨 O CÓDIGO NOVO ESTÁ RODANDO! Verifique a aba Network (Rede) após dar OK.");
-    console.log("🚨 PASSO 1: Botão clicado! Iniciando validações...");
-    
+
     if (password !== confirmPassword) {
-      console.log("❌ ERRO: Senhas não coincidem.");
       toast.error('As senhas não coincidem');
       return;
     }
 
     if (password.length < 6) {
-      console.log("❌ ERRO: Senha muito curta.");
       toast.error('A senha deve ter pelo menos 6 caracteres');
       return;
     }
 
     setIsLoading(true);
-    console.log("✅ PASSO 2: Validações OK. Enviando para o backend:", { name, email, role: userType.toUpperCase() });
 
     try {
-      const registerRes = await fetch('http://localhost:8080/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name,
-          email: email,
-          password: password,
-          role: userType.toUpperCase()
-        })
-      });
-
-      console.log("📡 PASSO 3: Resposta do servidor recebida! Status:", registerRes.status);
-
-      if (!registerRes.ok) {
-        const errorText = await registerRes.text();
-        console.error("❌ ERRO NO BACKEND:", errorText);
-        throw new Error('Erro ao criar conta. O e-mail já pode estar em uso.');
-      }
-
-      const registerData = await registerRes.json();
-      console.log("📦 PASSO 4: Dados recebidos com sucesso:", registerData);
-      
-      const tokenExtraido = registerData.token || registerData.accessToken || registerData.jwt || (typeof registerData === 'string' ? registerData : null);
-
-      if (tokenExtraido) {
-        console.log("🔑 PASSO 5: Token recebido! Salvando e entrando...");
-        localStorage.setItem('scoutpro_token', tokenExtraido);
-        toast.success(`Cadastro realizado com sucesso!`);
-        setTimeout(() => onSignup(userType), 1000);
-      } else {
-        console.log("⚠️ PASSO 5 (Alternativo): Sem token na resposta. Tentando login automático...");
-        const loginRes = await fetch('http://localhost:8080/api/v1/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-
-        if (loginRes.ok) {
-          const loginData = await loginRes.json();
-          const loginToken = loginData.token || loginData.accessToken || loginData.jwt || (typeof loginData === 'string' ? loginData : null);
-          
-          if (loginToken) {
-            console.log("🔑 Login automático funcionou!");
-            localStorage.setItem('scoutpro_token', loginToken);
-            toast.success(`Cadastro realizado com sucesso!`);
-            setTimeout(() => onSignup(userType), 1000);
-            return;
-          }
-        }
-        
-        console.log("❌ Login automático falhou. Redirecionando para login manual...");
-        toast.success('Conta criada! Faça login para continuar.');
-        setTimeout(() => onBackToLogin(), 1500);
-      }
-
+      const user = await signup({ name, email, password, role: userType });
+      toast.success('Cadastro realizado com sucesso!');
+      navigate(user.role === 'admin' ? '/admin' : '/olheiro', { replace: true });
     } catch (error: any) {
-      console.error("🔥 PASSO CRÍTICO: Falha na requisição React:", error);
-      toast.error(error.message || 'Erro de conexão com o servidor.');
+      toast.error(error.message || 'Erro ao criar conta. O e-mail já pode estar em uso.');
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +58,7 @@ export function SignupPage({ onSignup, onBack, onBackToLogin }: SignupPageProps)
       >
         <Button
           variant="ghost"
-          onClick={onBack}
+          onClick={() => navigate('/')}
           className="mb-4 text-muted-foreground hover:text-foreground"
           disabled={isLoading}
         >
@@ -140,7 +78,7 @@ export function SignupPage({ onSignup, onBack, onBackToLogin }: SignupPageProps)
             <h1 className="text-2xl font-bold mb-2">Criar Conta</h1>
           </div>
 
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-3">
               <Label>Tipo de Conta</Label>
               <div className="grid grid-cols-2 gap-3">
@@ -232,8 +170,7 @@ export function SignupPage({ onSignup, onBack, onBackToLogin }: SignupPageProps)
             </div>
 
             <Button
-              type="button" 
-              onClick={handleSubmit}
+              type="submit"
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={isLoading}
             >
@@ -242,9 +179,9 @@ export function SignupPage({ onSignup, onBack, onBackToLogin }: SignupPageProps)
 
             <p className="text-center text-sm text-muted-foreground">
               Já tem uma conta?{' '}
-              <button 
-                type="button" 
-                onClick={onBackToLogin}
+              <button
+                type="button"
+                onClick={() => navigate(`/login/${userType}`)}
                 className="text-primary hover:underline"
                 disabled={isLoading}
               >

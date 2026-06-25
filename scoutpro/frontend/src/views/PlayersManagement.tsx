@@ -11,6 +11,7 @@ import { Checkbox } from '../components/ui/checkbox';
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from '../components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Search, Grid3x3, List, GitCompare } from 'lucide-react';
+import { API_ENDPOINTS, apiRequest } from '../config/api';
 
 interface PlayersManagementProps {
   onViewPlayer: (id: string) => void;
@@ -49,15 +50,10 @@ export function PlayersManagement({ userType, onNavigate }: PlayersManagementPro
   const fetchAthletes = useCallback(async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('scoutpro_token');
-      const headers = { 'Authorization': `Bearer ${token}` };
-      
-      const res = await fetch('http://localhost:8080/api/v1/athletes', { headers });
+      const data = await apiRequest<any[]>(API_ENDPOINTS.PLAYERS.LIST);
 
-      if (res.ok) {
-        const data = await res.json();
-
-        const formattedPlayers = data.map((a: any) => {
+      {
+        const formattedPlayers = (data || []).map((a: any) => {
           // CORREÇÃO DO RATING: Média exata dos 7 atributos de 1 a 100
           const attrAvg = Math.round(
             ((a.passing || 50) + 
@@ -109,18 +105,14 @@ export function PlayersManagement({ userType, onNavigate }: PlayersManagementPro
 
   const handleUpdatePlayer = async (data: any) => {
     try {
-      const token = localStorage.getItem('scoutpro_token');
-      const res = await fetch(`http://localhost:8080/api/v1/athletes/${editingPlayer.id}`, {
+      await apiRequest(API_ENDPOINTS.PLAYERS.UPDATE(editingPlayer.id), {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: data,
       });
-      if (res.ok) { 
-        setEditingPlayer(null); 
-        fetchAthletes(); 
-      }
-    } catch (error) { 
-      console.error("Erro na atualização", error); 
+      setEditingPlayer(null);
+      fetchAthletes();
+    } catch (error) {
+      console.error('Erro na atualização', error);
     }
   };
 

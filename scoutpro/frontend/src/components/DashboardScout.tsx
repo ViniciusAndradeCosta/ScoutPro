@@ -5,11 +5,12 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 import {
-  FileText, Award, Clock, Star, Target, Calendar, ArrowRight, Trophy, BarChart3,
+  FileText, Award, Clock, Star, Target, Calendar, ArrowRight, BarChart3,
 } from 'lucide-react';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
+import { API_ENDPOINTS, apiRequest } from '../config/api';
 
 interface DashboardScoutProps {
   onViewPlayer: (id: string) => void;
@@ -33,22 +34,10 @@ export function DashboardScout({ onViewPlayer, onNavigate }: DashboardScoutProps
   useEffect(() => {
     const fetchScoutData = async () => {
       try {
-        const token = localStorage.getItem('scoutpro_token');
-        if (!token || token === 'undefined') {
-          setIsLoading(false);
-          return;
-        }
-
-        const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-        const [athletesRes, reportsRes] = await Promise.all([
-          fetch('http://localhost:8080/api/v1/athletes', { headers }),
-          fetch('http://localhost:8080/api/v1/reports', { headers })
+        const [athletes, reports] = await Promise.all([
+          apiRequest<any[]>(API_ENDPOINTS.PLAYERS.LIST),
+          apiRequest<any[]>(API_ENDPOINTS.REPORTS.LIST),
         ]);
-
-        if (!athletesRes.ok || !reportsRes.ok) throw new Error("Erro");
-
-        const athletes = await athletesRes.json();
-        const reports = await reportsRes.json();
 
         setMyStats([
           { icon: FileText, label: 'Total de Relatórios', value: reports.length.toString(), subtitle: 'criados por você', positive: reports.length > 0 },

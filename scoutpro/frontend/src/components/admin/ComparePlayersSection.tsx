@@ -4,6 +4,7 @@ import { Card } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Badge } from '../ui/badge';
 import { Users } from 'lucide-react';
+import { API_ENDPOINTS, apiRequest } from '../../config/api';
 
 export function ComparePlayersSection() {
   const [players, setPlayers] = useState<any[]>([]);
@@ -15,16 +16,11 @@ export function ComparePlayersSection() {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const token = localStorage.getItem('scoutpro_token');
-        const response = await fetch('http://localhost:8080/api/v1/athletes', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const data = await apiRequest<any[]>(API_ENDPOINTS.PLAYERS.LIST);
 
-        if (response.ok) {
-          const data = await response.json();
-          
+        {
           // Formata os dados para o padrão que o componente de comparação exige
-          const formattedPlayers = data.map((p: any) => ({
+          const formattedPlayers = (data || []).map((p: any) => ({
             id: p.id.toString(),
             name: p.name || 'Sem Nome',
             position: p.position || 'ND',

@@ -5,6 +5,7 @@ import { Input } from '../ui/input'; // <-- CORREÇÃO: Importação do Input ad
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Trash2, Plus, Upload, Loader2, Save, X, Activity, User, HeartPulse, Trophy, Image as ImageIcon } from 'lucide-react';
 import type { PlayerInjury } from '../../types';
+import { API_ENDPOINTS, apiRequest } from '../../config/api';
 
 interface AddPlayerFormProps {
   onSave?: (data: any) => void;
@@ -80,15 +81,10 @@ export function AddPlayerForm({ onSave, onCancel }: AddPlayerFormProps) {
         injuries
       };
 
-      const token = localStorage.getItem('scoutpro_token'); 
-      const response = await fetch('http://localhost:8080/api/v1/athletes', {
+      const savedData = await apiRequest<any>(API_ENDPOINTS.PLAYERS.CREATE, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token && { Authorization: `Bearer ${token}` }) },
-        body: JSON.stringify(payload),
+        body: payload,
       });
-
-      if (!response.ok) throw new Error(`Falha: ${response.status}`);
-      const savedData = await response.json();
       onSave?.(savedData);
     } catch (error) {
       console.error(error);

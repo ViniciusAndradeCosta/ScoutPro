@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
-import { 
+import {
   LayoutDashboard,
   Users,
   FileText,
@@ -9,53 +10,27 @@ import {
   Target,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-interface ScoutSidebarProps {
-  currentView: string;
-  onNavigate: (view: string) => void;
-}
+const menuItems = [
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/olheiro/dashboard' },
+  { label: 'Jogadores', icon: Users, path: '/olheiro/jogadores' },
+  { label: 'Relatórios', icon: FileText, path: '/olheiro/relatorios' },
+  { label: 'Mensagens', icon: MessageSquare, path: '/olheiro/mensagens' },
+  { label: 'Alvos', icon: Target, path: '/olheiro/alvos' },
+];
 
-export function ScoutSidebar({ 
-  currentView, 
-  onNavigate,
-}: ScoutSidebarProps) {
+const SETTINGS_PATH = '/olheiro/configuracoes';
+
+export function ScoutSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const menuItems = [
-    { 
-      id: 'overview', 
-      label: 'Dashboard', 
-      icon: LayoutDashboard,
-      description: 'Visão geral'
-    },
-    { 
-      id: 'players', 
-      label: 'Jogadores', 
-      icon: Users,
-      description: 'Buscar jogadores'
-    },
-    { 
-      id: 'reports', 
-      label: 'Relatórios', 
-      icon: FileText,
-      description: 'Meus relatórios'
-    },
-    { 
-      id: 'messages', 
-      label: 'Mensagens', 
-      icon: MessageSquare,
-      description: 'Comunicação'
-    },
-    { 
-      id: 'targets', 
-      label: 'Alvos', 
-      icon: Target,
-      description: 'Jogadores favoritos'
-    },
-  ];
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   return (
     <motion.aside
@@ -92,11 +67,7 @@ export function ScoutSidebar({
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="hover:bg-accent/10"
           >
-            {isCollapsed ? (
-              <ChevronRight className="w-5 h-5" />
-            ) : (
-              <ChevronLeft className="w-5 h-5" />
-            )}
+            {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
           </Button>
         </div>
       </div>
@@ -105,17 +76,15 @@ export function ScoutSidebar({
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentView === item.id;
-          
+          const active = isActive(item.path);
+
           return (
             <Button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
-              variant={isActive ? 'default' : 'ghost'}
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              variant={active ? 'default' : 'ghost'}
               className={`w-full justify-start gap-3 h-12 ${
-                isActive 
-                  ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg' 
-                  : 'hover:bg-accent/10'
+                active ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg' : 'hover:bg-accent/10'
               } ${isCollapsed ? 'justify-center' : ''}`}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -129,7 +98,6 @@ export function ScoutSidebar({
                     className="flex items-center justify-between flex-1"
                   >
                     <span className="font-medium">{item.label}</span>
-                    {/* Badge removido para não mostrar números */}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -143,9 +111,11 @@ export function ScoutSidebar({
       {/* Footer */}
       <div className="p-4 space-y-2">
         <Button
-          onClick={() => onNavigate('settings')}
-          variant="ghost"
-          className={`w-full justify-start gap-3 h-12 hover:bg-accent/10 ${isCollapsed ? 'justify-center' : ''}`}
+          onClick={() => navigate(SETTINGS_PATH)}
+          variant={isActive(SETTINGS_PATH) ? 'default' : 'ghost'}
+          className={`w-full justify-start gap-3 h-12 hover:bg-accent/10 ${
+            isActive(SETTINGS_PATH) ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg' : ''
+          } ${isCollapsed ? 'justify-center' : ''}`}
         >
           <Settings className="w-5 h-5 flex-shrink-0" />
           {!isCollapsed && <span className="font-medium">Configurações</span>}

@@ -15,6 +15,7 @@ import {
 import { User, Lock, Palette, Save, Moon, Sun, Camera } from 'lucide-react';
 import { useTheme } from '../utils/ThemeContext';
 import { toast } from 'sonner';
+import { API_ENDPOINTS, apiRequest } from '../config/api';
 
 interface SettingsPageProps {
   userType: 'admin' | 'scout';
@@ -45,29 +46,20 @@ export function SettingsPage({ userType }: SettingsPageProps) {
   useEffect(() => {
     const fetchMySettings = async () => {
       try {
-        const token = localStorage.getItem('scoutpro_token');
-        if (!token) return;
-
-        const response = await fetch('http://localhost:8080/api/v1/users/me', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (response.ok) {
-          const myData = await response.json();
-          setFormData(prev => ({
-            ...prev,
-            name: myData.name || '',
-            email: myData.email || '',
-            phone: myData.phone || '',
-            club: myData.club || '',
-            location: myData.location || '',
-            bio: myData.bio || ''
-          }));
-          // Se tiver imagem salva no banco (Base64), carrega aqui:
-          if (myData.image) setAvatarPreview(myData.image);
-        }
+        const myData = await apiRequest<any>(API_ENDPOINTS.USERS.ME);
+        setFormData(prev => ({
+          ...prev,
+          name: myData.name || '',
+          email: myData.email || '',
+          phone: myData.phone || '',
+          club: myData.club || '',
+          location: myData.location || '',
+          bio: myData.bio || ''
+        }));
+        // Se tiver imagem salva no banco (Base64), carrega aqui:
+        if (myData.image) setAvatarPreview(myData.image);
       } catch (error) {
-        console.error("Erro ao carregar configurações:", error);
+        console.error('Erro ao carregar configurações:', error);
       }
     };
 
@@ -102,30 +94,16 @@ export function SettingsPage({ userType }: SettingsPageProps) {
   // FUNÇÃO PARA SALVAR O PERFIL COMPLETO (Foto e textos)
   const submitProfileUpdate = async () => {
     try {
-      const token = localStorage.getItem('scoutpro_token');
-      
       // Junta os textos com a imagem Base64
       const payload = {
         ...formData,
         image: avatarPreview || ''
       };
 
-      const response = await fetch('http://localhost:8080/api/v1/users/update-profile', {
-        method: 'PUT',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (response.ok) {
-        toast.success('Informações salva com Sucesso!'); // FRASE EXATA
-      } else {
-        toast.error('Erro ao salvar as informações.');
-      }
+      await apiRequest(API_ENDPOINTS.USERS.UPDATE_PROFILE, { method: 'PUT', body: payload });
+      toast.success('Informações salva com Sucesso!'); // FRASE EXATA
     } catch (error) {
-      toast.error('Erro de conexão com o servidor.');
+      toast.error('Erro ao salvar as informações.');
     }
   };
 
@@ -145,28 +123,17 @@ export function SettingsPage({ userType }: SettingsPageProps) {
     }
 
     try {
-      const token = localStorage.getItem('scoutpro_token');
-      const response = await fetch('http://localhost:8080/api/v1/users/change-password', {
+      await apiRequest(API_ENDPOINTS.USERS.CHANGE_PASSWORD, {
         method: 'PUT',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+        body: {
           currentPassword: passwords.currentPassword,
-          newPassword: passwords.newPassword
-        })
+          newPassword: passwords.newPassword,
+        },
       });
-
-      if (response.ok) {
-        toast.success("Senha Alterada com Sucesso!"); // FRASE EXATA
-        setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' }); // Limpa os campos
-      } else {
-        const errorText = await response.text();
-        toast.error(errorText || "Senha atual incorreta.");
-      }
-    } catch (error) {
-      toast.error("Erro de conexão com o servidor.");
+      toast.success('Senha Alterada com Sucesso!'); // FRASE EXATA
+      setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' }); // Limpa os campos
+    } catch (error: any) {
+      toast.error(error?.message || 'Senha atual incorreta.');
     }
   };
 

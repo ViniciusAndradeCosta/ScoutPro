@@ -1,56 +1,14 @@
-import { Menu, User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { Button } from './ui/button';
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
-interface HeaderProps {
-  onLoginClick?: () => void;
-  onMenuClick?: () => void;
-  onLogout?: () => void;
-  onSettingsClick?: () => void; // <--- Nome alterado aqui
-  showMenu?: boolean;
-  userType?: 'admin' | 'scout' | null;
-  userName?: string;
-}
-
-export function Header({ 
-  onLoginClick, 
-  onMenuClick, 
-  onLogout, 
-  onSettingsClick, // <--- Nome alterado aqui
-  showMenu = false, 
-  userType, 
-  userName 
-}: HeaderProps) {
+export function Header() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const [realFirstName, setRealFirstName] = useState('');
-
-  useEffect(() => {
-    if (!userType) return;
-
-    const fetchMyName = async () => {
-      try {
-        const token = localStorage.getItem('scoutpro_token');
-        if (!token) return;
-
-        const response = await fetch('http://localhost:8080/api/v1/users/me', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (response.ok) {
-          const myData = await response.json();
-          const fullName = myData.name || '';
-          const firstName = fullName.split(' ')[0];
-          setRealFirstName(firstName);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar nome no header:", error);
-      }
-    };
-
-    fetchMyName();
-  }, [userType]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -68,36 +26,26 @@ export function Header({
     };
   }, [isDropdownOpen]);
 
-  const handleLogoutClick = () => {
+  const role = user?.role ?? 'scout';
+  const roleLabel = role === 'admin' ? 'Administrador' : 'Olheiro';
+  const displayLabel = user?.name?.split(' ')[0] || roleLabel;
+  const settingsPath = role === 'admin' ? '/admin/configuracoes' : '/olheiro/configuracoes';
+
+  const handleSettings = () => {
     setIsDropdownOpen(false);
-    if (onLogout) {
-      onLogout();
-    }
+    navigate(settingsPath);
   };
 
-  const handleSettingsMenuClick = () => {
+  const handleLogout = async () => {
     setIsDropdownOpen(false);
-    if (onSettingsClick) {
-      onSettingsClick(); // <--- Chamando a função correta
-    }
+    await logout();
+    navigate('/');
   };
-
-  const displayLabel = realFirstName || userName || (userType === 'admin' ? 'Administrador' : 'Olheiro');
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[200] bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="w-full px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          {showMenu && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onMenuClick}
-              className="lg:hidden"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          )}
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
               <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
@@ -112,59 +60,46 @@ export function Header({
           </div>
         </div>
 
-        {!userType && onLoginClick && (
-          <Button onClick={onLoginClick} className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <User className="w-4 h-4 mr-2" />
-            Login
+        <div className="relative" ref={dropdownRef}>
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 hover:bg-accent/10"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          >
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <User className="w-4 h-4 text-background" />
+            </div>
+
+            <span className="text-sm hidden sm:inline font-semibold">{displayLabel}</span>
+
+            <ChevronDown className={`w-4 h-4 opacity-50 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
           </Button>
-        )}
 
-        {userType && (
-          <div className="relative" ref={dropdownRef}>
-            <Button 
-              variant="ghost" 
-              className="flex items-center gap-2 hover:bg-accent/10"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <User className="w-4 h-4 text-background" />
+          {isDropdownOpen && (
+            <div className="absolute right-0 top-full mt-2 w-56 bg-popover border border-border rounded-md shadow-lg z-[300] overflow-hidden">
+              <div className="p-3 border-b border-border">
+                <p className="font-medium text-sm">{displayLabel}</p>
+                <p className="text-xs text-muted-foreground">{roleLabel}</p>
               </div>
-              
-              <span className="text-sm hidden sm:inline font-semibold">
-                {displayLabel}
-              </span>
-              
-              <ChevronDown className={`w-4 h-4 opacity-50 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-            </Button>
-
-            {isDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-popover border border-border rounded-md shadow-lg z-[300] overflow-hidden">
-                <div className="p-3 border-b border-border">
-                  <p className="font-medium text-sm">{displayLabel}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {userType === 'admin' ? 'Administrador' : 'Olheiro'}
-                  </p>
-                </div>
-                <div className="p-1">
-                  <button
-                    onClick={handleSettingsMenuClick}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent/10 rounded-sm transition-colors text-left"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Configurações
-                  </button>
-                  <button
-                    onClick={handleLogoutClick}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-sm transition-colors text-left"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Sair
-                  </button>
-                </div>
+              <div className="p-1">
+                <button
+                  onClick={handleSettings}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent/10 rounded-sm transition-colors text-left"
+                >
+                  <Settings className="w-4 h-4" />
+                  Configurações
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-sm transition-colors text-left"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sair
+                </button>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

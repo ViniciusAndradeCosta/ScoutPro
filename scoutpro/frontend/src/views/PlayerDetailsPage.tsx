@@ -5,7 +5,8 @@ import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Card } from '../components/ui/card';
-import { 
+import { API_ENDPOINTS, apiRequest } from '../config/api';
+import {
   X, Edit, Target, Activity, AlertCircle, Award,
   MapPin, Calendar, Ruler, Weight, Flag, User, MessageSquare, FileText, CheckCircle, XCircle,
   Stethoscope
@@ -74,16 +75,12 @@ export function PlayerDetailsModal({ player, isOpen, onClose, onEdit, onMessage 
 
   useEffect(() => {
     if (isOpen && player) {
-      const token = localStorage.getItem('scoutpro_token');
-      fetch('http://localhost:8080/api/v1/reports', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      .then(res => res.json())
-      .then(data => {
-        const filtered = data.filter((r: any) => String(r.athleteId) === String(player.id));
-        setPlayerReports(filtered);
-      })
-      .catch(console.error);
+      apiRequest<any[]>(API_ENDPOINTS.REPORTS.LIST)
+        .then((data) => {
+          const filtered = (data || []).filter((r: any) => String(r.athleteId) === String(player.id));
+          setPlayerReports(filtered);
+        })
+        .catch(console.error);
     }
   }, [isOpen, player]);
 

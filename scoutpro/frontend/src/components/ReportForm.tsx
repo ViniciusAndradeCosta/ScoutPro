@@ -24,6 +24,7 @@ import {
   Minus,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { API_ENDPOINTS, apiRequest } from '../config/api';
 
 interface ReportFormProps {
   playerId: string;
@@ -74,46 +75,29 @@ export function ReportForm({ playerId, playerName, onBack, onSave }: ReportFormP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const technicalRating = parseFloat(calculateCategoryAverage(attributeCategories.technical.attributes));
+    const tacticalRating = parseFloat(calculateCategoryAverage(attributeCategories.tactical.attributes));
+    const physicalRating = parseFloat(calculateCategoryAverage(attributeCategories.physical.attributes));
+
+    const payload = {
+      athleteId: parseInt(playerId),
+      technicalRating: Math.round(technicalRating),
+      tacticalRating: Math.round(tacticalRating),
+      physicalRating: Math.round(physicalRating),
+      matchDate: new Date().toISOString(),
+      strengths,
+      weaknesses,
+      notes: analysis,
+    };
+
     try {
-      const token = localStorage.getItem('scoutpro_token');
-      if (!token) {
-        toast.error("Token de autenticação não encontrado!");
-        return;
-      }
-
-      const technicalRating = parseFloat(calculateCategoryAverage(attributeCategories.technical.attributes));
-      const tacticalRating = parseFloat(calculateCategoryAverage(attributeCategories.tactical.attributes));
-      const physicalRating = parseFloat(calculateCategoryAverage(attributeCategories.physical.attributes));
-
-      const payload = {
-        athleteId: parseInt(playerId),
-        technicalRating: Math.round(technicalRating),
-        tacticalRating: Math.round(tacticalRating),
-        physicalRating: Math.round(physicalRating),
-        matchDate: new Date().toISOString(),
-        strengths,
-        weaknesses,
-        notes: analysis
-      };
-
-      const res = await fetch('http://localhost:8080/api/v1/reports', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (res.ok) {
-        toast.success('Relatório salvo com sucesso!'); // Pop-up estiloso
-        if (onSave) onSave();
-      } else {
-        toast.error('Erro ao salvar o relatório no banco de dados.');
-      }
+      await apiRequest(API_ENDPOINTS.REPORTS.CREATE, { method: 'POST', body: payload });
+      toast.success('Relatório salvo com sucesso!');
+      onSave?.();
     } catch (error) {
-      console.error('Erro na requisição:', error);
-      toast.error('Ocorreu um erro de rede ao tentar salvar o relatório.');
+      console.error('Erro ao salvar o relatório:', error);
+      toast.error('Erro ao salvar o relatório no banco de dados.');
     }
   };
 
